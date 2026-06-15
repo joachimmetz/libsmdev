@@ -180,10 +180,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\smdev_test_getopt.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\tests\smdev_test_handle.c"
 				>
 			</File>
@@ -199,10 +195,6 @@
 			>
 			<File
 				RelativePath="..\..\tests\smdev_test_functions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\smdev_test_getopt.h"
 				>
 			</File>
 			<File

@@ -243,7 +243,13 @@ int main(
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBSMDEV_DLL_IMPORT )
+#if defined( HDIO_GET_IDENTITY )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( HDIO_GET_IDENTITY ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBSMDEV_DLL_IMPORT ) */
 }
 

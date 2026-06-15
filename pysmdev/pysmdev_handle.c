@@ -266,71 +266,6 @@ PyTypeObject pysmdev_handle_type_object = {
 	0
 };
 
-/* Creates a new pysmdev handle object
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pysmdev_handle_new(
-           void )
-{
-	static char *function            = "pysmdev_handle_new";
-	pysmdev_handle_t *pysmdev_handle = NULL;
-
-	pysmdev_handle = PyObject_New(
-	                  struct pysmdev_handle,
-	                  &pysmdev_handle_type_object );
-
-	if( pysmdev_handle == NULL )
-	{
-		PyErr_Format(
-		 PyExc_MemoryError,
-		 "%s: unable to initialize handle.",
-		 function );
-
-		goto on_error;
-	}
-	if( pysmdev_handle_init(
-	     pysmdev_handle ) != 0 )
-	{
-		PyErr_Format(
-		 PyExc_MemoryError,
-		 "%s: unable to initialize handle.",
-		 function );
-
-		goto on_error;
-	}
-	return( (PyObject *) pysmdev_handle );
-
-on_error:
-	if( pysmdev_handle != NULL )
-	{
-		Py_DecRef(
-		 (PyObject *) pysmdev_handle );
-	}
-	return( NULL );
-}
-
-/* Creates a new handle object and opens it
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pysmdev_handle_new_open(
-           PyObject *self PYSMDEV_ATTRIBUTE_UNUSED,
-           PyObject *arguments,
-           PyObject *keywords )
-{
-	PyObject *pysmdev_handle = NULL;
-
-	PYSMDEV_UNREFERENCED_PARAMETER( self )
-
-	pysmdev_handle = pysmdev_handle_new();
-
-	pysmdev_handle_open(
-	 (pysmdev_handle_t *) pysmdev_handle,
-	 arguments,
-	 keywords );
-
-	return( pysmdev_handle );
-}
-
 /* Initializes a handle object
  * Returns 0 if successful or -1 on error
  */
@@ -1215,6 +1150,17 @@ PyObject *pysmdev_handle_seek_offset(
 	     &offset,
 	     &whence ) == 0 )
 	{
+		return( NULL );
+	}
+	if( ( whence != SEEK_CUR )
+	 && ( whence != SEEK_END )
+	 && ( whence != SEEK_SET ) )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: unsupported whence value.",
+		 function );
+
 		return( NULL );
 	}
 	Py_BEGIN_ALLOW_THREADS

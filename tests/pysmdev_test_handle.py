@@ -19,8 +19,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
 import os
+import platform
 import sys
 import unittest
 
@@ -30,6 +30,34 @@ import pysmdev
 class HandleTypeTests(unittest.TestCase):
   """Tests the handle type."""
 
+  def _check_read_access(self, path):
+      """Check if a device file can be read.
+
+      Args:
+        path (str): path to the device file.
+      """
+      # Note that os.access(path, os.R_OK) can return True while open(path, 'rb') fails.
+      try:
+        with open(path, 'rb'): pass
+      except Exception:
+        return False
+
+      return True
+
+  def _get_source(self):
+    """Retrieves a source for testing."""
+    if platform.system() == 'Windows':
+      return '\\\\.\\PhysicalDrive0'
+
+    source = '/dev/sda'
+    if not os.path.exists(source):
+      source = '/dev/vda'
+
+    if not self._check_read_access(source):
+      raise unittest.SkipTest("missing readable source")
+
+    return source
+
   def test_signal_abort(self):
     """Tests the signal_abort function."""
     smdev_handle = pysmdev.handle()
@@ -38,9 +66,7 @@ class HandleTypeTests(unittest.TestCase):
 
   def test_open(self):
     """Tests the open function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+    test_source = self._get_source()
 
     smdev_handle = pysmdev.handle()
 
@@ -59,10 +85,6 @@ class HandleTypeTests(unittest.TestCase):
 
   def test_close(self):
     """Tests the close function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
-
     smdev_handle = pysmdev.handle()
 
     with self.assertRaises(IOError):
@@ -70,9 +92,7 @@ class HandleTypeTests(unittest.TestCase):
 
   def test_open_close(self):
     """Tests the open and close functions."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+    test_source = self._get_source()
 
     smdev_handle = pysmdev.handle()
 
@@ -86,15 +106,13 @@ class HandleTypeTests(unittest.TestCase):
 
   def test_read_buffer(self):
     """Tests the read_buffer function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+    test_source = self._get_source()
 
     smdev_handle = pysmdev.handle()
 
     smdev_handle.open(test_source)
 
-    file_size = smdev_handle.get_size()
+    file_size = smdev_handle.get_media_size()
 
     # Test normal read.
     data = smdev_handle.read_buffer(size=4096)
@@ -128,15 +146,13 @@ class HandleTypeTests(unittest.TestCase):
 
   def test_read_buffer_at_offset(self):
     """Tests the read_buffer_at_offset function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+    test_source = self._get_source()
 
     smdev_handle = pysmdev.handle()
 
     smdev_handle.open(test_source)
 
-    file_size = smdev_handle.get_size()
+    file_size = smdev_handle.get_media_size()
 
     # Test normal read.
     data = smdev_handle.read_buffer_at_offset(4096, 0)
@@ -165,15 +181,13 @@ class HandleTypeTests(unittest.TestCase):
 
   def test_seek_offset(self):
     """Tests the seek_offset function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+    test_source = self._get_source()
 
     smdev_handle = pysmdev.handle()
 
     smdev_handle.open(test_source)
 
-    file_size = smdev_handle.get_size()
+    file_size = smdev_handle.get_media_size()
 
     smdev_handle.seek_offset(16, os.SEEK_SET)
 
@@ -200,20 +214,16 @@ class HandleTypeTests(unittest.TestCase):
     offset = smdev_handle.get_offset()
     self.assertEqual(offset, file_size + 16)
 
-    # TODO: change IOError into ValueError
     with self.assertRaises(IOError):
       smdev_handle.seek_offset(-1, os.SEEK_SET)
 
-    # TODO: change IOError into ValueError
     with self.assertRaises(IOError):
       smdev_handle.seek_offset(-32 - file_size, os.SEEK_CUR)
 
-    # TODO: change IOError into ValueError
     with self.assertRaises(IOError):
       smdev_handle.seek_offset(-32 - file_size, os.SEEK_END)
 
-    # TODO: change IOError into ValueError
-    with self.assertRaises(IOError):
+    with self.assertRaises(ValueError):
       smdev_handle.seek_offset(0, -1)
 
     smdev_handle.close()
@@ -224,15 +234,4 @@ class HandleTypeTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-  argument_parser = argparse.ArgumentParser()
-
-  argument_parser.add_argument(
-      "source", nargs="?", action="store", metavar="PATH",
-      default=None, help="path of the source file.")
-
-  options, unknown_options = argument_parser.parse_known_args()
-  unknown_options.insert(0, sys.argv[0])
-
-  setattr(unittest, "source", options.source)
-
-  unittest.main(argv=unknown_options, verbosity=2)
+  unittest.main(verbosity=2)

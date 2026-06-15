@@ -1003,34 +1003,42 @@ int libsmdev_handle_close(
 	}
 	internal_handle = (libsmdev_internal_handle_t *) handle;
 
-	if( internal_handle->device_file != NULL )
+	if( internal_handle->device_file == NULL )
 	{
-		if( libcfile_file_close(
-		     internal_handle->device_file,
-		     error ) != 0 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_CLOSE_FAILED,
-			 "%s: unable to close device file.",
-			 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid handle - missing device file.",
+		 function );
 
-			result = -1;
-		}
-		if( libcfile_file_free(
-		     &( internal_handle->device_file ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free device file.",
-			 function );
+		return( -1 );
+	}
+	if( libcfile_file_close(
+	     internal_handle->device_file,
+	     error ) != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_CLOSE_FAILED,
+		 "%s: unable to close device file.",
+		 function );
 
-			result = -1;
-		}
+		result = -1;
+	}
+	if( libcfile_file_free(
+	     &( internal_handle->device_file ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free device file.",
+		 function );
+
+		result = -1;
 	}
 	internal_handle->offset                = 0;
 	internal_handle->bytes_per_sector      = 0;

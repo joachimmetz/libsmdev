@@ -53,7 +53,7 @@ PyMethodDef pysmdev_module_methods[] = {
 	  "Checks if the filename refers to a device." },
 
 	{ "open",
-	  (PyCFunction) pysmdev_handle_new_open,
+	  (PyCFunction) pysmdev_open_new_handle,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "open(filename, mode='r') -> Object\n"
 	  "\n"
@@ -297,6 +297,57 @@ PyObject *pysmdev_check_device(
 	 "%s: unsupported string object type.",
 	 function );
 
+	return( NULL );
+}
+
+/* Creates a new handle object and opens it
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pysmdev_open_new_handle(
+           PyObject *self PYSMDEV_ATTRIBUTE_UNUSED,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	pysmdev_handle_t *pysmdev_handle = NULL;
+	static char *function            = "pysmdev_open_new_handle";
+
+	PYSMDEV_UNREFERENCED_PARAMETER( self )
+
+	/* PyObject_New does not invoke tp_init
+	 */
+	pysmdev_handle = PyObject_New(
+	                  struct pysmdev_handle,
+	                  &pysmdev_handle_type_object );
+
+	if( pysmdev_handle == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( pysmdev_handle_init(
+	     pysmdev_handle ) != 0 )
+	{
+		goto on_error;
+	}
+	if( pysmdev_handle_open(
+	     pysmdev_handle,
+	     arguments,
+	     keywords ) == NULL )
+	{
+		goto on_error;
+	}
+	return( (PyObject *) pysmdev_handle );
+
+on_error:
+	if( pysmdev_handle != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) pysmdev_handle );
+	}
 	return( NULL );
 }
 

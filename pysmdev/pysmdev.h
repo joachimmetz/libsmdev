@@ -40,6 +40,11 @@ PyObject *pysmdev_check_device(
            PyObject *arguments,
            PyObject *keywords );
 
+PyObject *pysmdev_open_new_handle(
+           PyObject *self,
+           PyObject *arguments,
+           PyObject *keywords );
+
 #if PY_MAJOR_VERSION >= 3
 PyMODINIT_FUNC PyInit_pysmdev(
                 void );

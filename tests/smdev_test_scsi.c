@@ -1042,7 +1042,13 @@ int main(
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBSMDEV_DLL_IMPORT )
+#if defined( HAVE_SCSI_SG_H )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( HAVE_SCSI_SG_H ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBSMDEV_DLL_IMPORT ) */
 }
 

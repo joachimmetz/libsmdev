@@ -19,8 +19,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
 import os
+import platform
 import sys
 import unittest
 
@@ -29,6 +29,34 @@ import pysmdev
 
 class SupportFunctionsTests(unittest.TestCase):
   """Tests the support functions."""
+
+  def _check_read_access(self, path):
+      """Check if a device file can be read.
+
+      Args:
+        path (str): path to the device file.
+      """
+      # Note that os.access(path, os.R_OK) can return True while open(path, 'rb') fails.
+      try:
+        with open(path, 'rb'): pass
+      except Exception:
+        return False
+
+      return True
+
+  def _get_source(self):
+    """Retrieves a source for testing."""
+    if platform.system() == 'Windows':
+      return '\\\\.\\PhysicalDrive0'
+
+    source = '/dev/sda'
+    if not os.path.exists(source):
+      source = '/dev/vda'
+
+    if not self._check_read_access(source):
+      raise unittest.SkipTest("missing readable source")
+
+    return source
 
   def test_get_version(self):
     """Tests the get_version function."""
@@ -39,9 +67,7 @@ class SupportFunctionsTests(unittest.TestCase):
 
   def test_open(self):
     """Tests the open function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+    test_source = self._get_source()
 
     smdev_handle = pysmdev.open(test_source)
     self.assertIsNotNone(smdev_handle)
@@ -53,15 +79,4 @@ class SupportFunctionsTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-  argument_parser = argparse.ArgumentParser()
-
-  argument_parser.add_argument(
-      "source", nargs="?", action="store", metavar="PATH",
-      default=None, help="path of the source device.")
-
-  options, unknown_options = argument_parser.parse_known_args()
-  unknown_options.insert(0, sys.argv[0])
-
-  setattr(unittest, "source", options.source)
-
-  unittest.main(argv=unknown_options, verbosity=2)
+  unittest.main(verbosity=2)

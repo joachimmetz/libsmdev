@@ -704,7 +704,13 @@ int main(
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBSMDEV_DLL_IMPORT )
+#if defined( HAVE_LINUX_CDROM_H )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( HAVE_LINUX_CDROM_H ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBSMDEV_DLL_IMPORT ) */
 }
 

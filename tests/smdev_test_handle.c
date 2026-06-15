@@ -31,12 +31,12 @@
 #endif
 
 #include "smdev_test_functions.h"
-#include "smdev_test_getopt.h"
 #include "smdev_test_libcerror.h"
 #include "smdev_test_libcfile.h"
 #include "smdev_test_libsmdev.h"
 #include "smdev_test_macros.h"
 #include "smdev_test_memory.h"
+#include "smdev_test_unused.h"
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER ) && SIZEOF_WCHAR_T != 2 && SIZEOF_WCHAR_T != 4
 #error Unsupported size of wchar_t
@@ -1127,42 +1127,23 @@ on_error:
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
-     int argc,
-     wchar_t * const argv[] )
+     int argc SMDEV_TEST_ATTRIBUTE_UNUSED,
+     wchar_t * const argv[] SMDEV_TEST_ATTRIBUTE_UNUSED )
 #else
 int main(
-     int argc,
-     char * const argv[] )
+     int argc SMDEV_TEST_ATTRIBUTE_UNUSED,
+     char * const argv[] SMDEV_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
 	libcerror_error_t *error     = NULL;
 	libcfile_file_t *device_file = NULL;
 	libsmdev_handle_t *handle    = NULL;
 	system_character_t *source   = NULL;
-	system_integer_t option      = 0;
 	int result                   = 0;
 
-	while( ( option = smdev_test_getopt(
-	                   argc,
-	                   argv,
-	                   _SYSTEM_STRING( "" ) ) ) != (system_integer_t) -1 )
-	{
-		switch( option )
-		{
-			case (system_integer_t) '?':
-			default:
-				fprintf(
-				 stderr,
-				 "Invalid argument: %" PRIs_SYSTEM ".\n",
-				 argv[ optind - 1 ] );
+	SMDEV_TEST_UNREFERENCED_PARAMETER( argc )
+	SMDEV_TEST_UNREFERENCED_PARAMETER( argv )
 
-				return( EXIT_FAILURE );
-		}
-	}
-	if( optind < argc )
-	{
-		source = argv[ optind ];
-	}
 #if defined( HAVE_DEBUG_OUTPUT ) && defined( SMDEV_TEST_HANDLE_VERBOSE )
 	libsmdev_notify_set_verbose(
 	 1 );
@@ -1202,6 +1183,20 @@ int main(
 		source = _SYSTEM_STRING( "\\\\.\\PhysicalDrive0" );
 #else
 		source = _SYSTEM_STRING( "/dev/sda" );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libcfile_file_exists_wide(
+		          source,
+		          NULL );
+#else
+		result = libcfile_file_exists(
+		          source,
+		          NULL );
+#endif
+		if( result != 1 )
+		{
+			source = _SYSTEM_STRING( "/dev/vda" );
+		}
 #endif
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libcfile_file_open_wide(
@@ -1215,26 +1210,6 @@ int main(
 		          source,
 		          LIBCFILE_OPEN_READ,
 		          NULL );
-#endif
-#if !defined( WINAPI )
-		if( result != 1 )
-		{
-			source = _SYSTEM_STRING( "/dev/vda" );
-
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-			result = libcfile_file_open_wide(
-			          device_file,
-			          source,
-			          LIBCFILE_OPEN_READ,
-			          NULL );
-#else
-			result = libcfile_file_open(
-			          device_file,
-			          source,
-			          LIBCFILE_OPEN_READ,
-			          NULL );
-#endif
-		}
 #endif
 		if( result != 1 )
 		{

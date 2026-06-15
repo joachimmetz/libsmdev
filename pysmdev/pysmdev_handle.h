@@ -49,14 +49,6 @@ struct pysmdev_handle
 extern PyMethodDef pysmdev_handle_object_methods[];
 extern PyTypeObject pysmdev_handle_type_object;
 
-PyObject *pysmdev_handle_new(
-           void );
-
-PyObject *pysmdev_handle_new_open(
-           PyObject *self,
-           PyObject *arguments,
-           PyObject *keywords );
-
 int pysmdev_handle_init(
      pysmdev_handle_t *pysmdev_handle );
 
