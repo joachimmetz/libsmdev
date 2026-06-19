@@ -11,8 +11,6 @@ AM_CPPFLAGS = \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBSMDEV_DLL_IMPORT@
 
-check_PYTHONdir = $(abs_top_builddir)
-
 BUILT_SOURCES = package.m4
 
 check_AUTOTESTS = \
@@ -23,7 +21,7 @@ if HAVE_PYTHON_TESTS
 check_AUTOTESTS += test_python_module
 endif
 
-check_PYTHON_SCRIPTS = \
+check_SCRIPTS = \
 	pysmdev_test_handle.py \
 	pysmdev_test_support.py
 
@@ -230,7 +228,7 @@ test_python_module: \
 
 EXTRA_DIST = \
 	$(check_AUTOTESTS:=.at) \
-	$(check_PYTHON_SCRIPTS) \
+	$(check_SCRIPTS) \
 	package.m4 \
 	test_macros.at
 
