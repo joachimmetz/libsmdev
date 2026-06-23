@@ -41,10 +41,6 @@ struct info_handle
 	 */
 	libsmdev_handle_t *input_handle;
 
-	/* Value to indicate to ignore the data files
-	 */
-	uint8_t ignore_data_files;
-
 	/* The notification output stream
 	 */
 	FILE *notify_stream;

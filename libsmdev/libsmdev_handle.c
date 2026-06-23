@@ -357,7 +357,7 @@ on_error:
 }
 
 /* Frees a handle
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libsmdev_handle_free(
      libsmdev_handle_t **handle,
@@ -980,7 +980,7 @@ on_error:
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 /* Closes a device handle
- * Returns the 0 if succesful or -1 on error
+ * Returns the 0 if successful or -1 on error
  */
 int libsmdev_handle_close(
      libsmdev_handle_t *handle,
@@ -1858,7 +1858,7 @@ int libsmdev_handle_get_offset(
 
 /* Retrieves the filename size of the file handle
  * The filename size includes the end of string character
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libsmdev_handle_get_filename_size(
      libsmdev_handle_t *handle,
@@ -1965,7 +1965,7 @@ int libsmdev_handle_get_filename_size(
 
 /* Retrieves the filename of the file handle
  * The filename size should include the end of string character
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libsmdev_handle_get_filename(
      libsmdev_handle_t *handle,
@@ -2155,7 +2155,7 @@ int libsmdev_handle_get_filename(
 }
 
 /* Sets the filename for the file handle
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libsmdev_handle_set_filename(
      libsmdev_handle_t *handle,
@@ -2392,7 +2392,7 @@ int libsmdev_handle_set_filename(
 
 /* Retrieves the filename size of the file handle
  * The filename size includes the end of string character
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libsmdev_handle_get_filename_size_wide(
      libsmdev_handle_t *handle,
@@ -2499,7 +2499,7 @@ int libsmdev_handle_get_filename_size_wide(
 
 /* Retrieves the filename of the file handle
  * The filename size should include the end of string character
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libsmdev_handle_get_filename_wide(
      libsmdev_handle_t *handle,
@@ -2689,7 +2689,7 @@ int libsmdev_handle_get_filename_wide(
 }
 
 /* Sets the filename for the file handle
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libsmdev_handle_set_filename_wide(
      libsmdev_handle_t *handle,
@@ -3106,7 +3106,21 @@ int libsmdev_internal_handle_determine_media_information(
 				 "%s: unable to set vendor.",
 				 function );
 
-				goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					if( ( error != NULL )
+					 && ( *error != NULL ) )
+					{
+						libcnotify_print_error_backtrace(
+						 *error );
+					}
+				}
+#endif
+				libcerror_error_free(
+				 error );
+
+				internal_handle->vendor[ 0 ] = 0;
 			}
 		}
 		if( ( (STORAGE_DEVICE_DESCRIPTOR *) response )->ProductIdOffset > 0 )
@@ -3130,7 +3144,21 @@ int libsmdev_internal_handle_determine_media_information(
 				 "%s: unable to set model.",
 				 function );
 
-				goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					if( ( error != NULL )
+					 && ( *error != NULL ) )
+					{
+						libcnotify_print_error_backtrace(
+						 *error );
+					}
+				}
+#endif
+				libcerror_error_free(
+				 error );
+
+				internal_handle->model[ 0 ] = 0;
 			}
 		}
 		if( ( (STORAGE_DEVICE_DESCRIPTOR *) response )->SerialNumberOffset > 0 )
@@ -3154,7 +3182,21 @@ int libsmdev_internal_handle_determine_media_information(
 				 "%s: unable to set serial number.",
 				 function );
 
-				goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					if( ( error != NULL )
+					 && ( *error != NULL ) )
+					{
+						libcnotify_print_error_backtrace(
+						 *error );
+					}
+				}
+#endif
+				libcerror_error_free(
+				 error );
+
+				internal_handle->serial_number[ 0 ] = 0;
 			}
 		}
 		internal_handle->removable = ( (STORAGE_DEVICE_DESCRIPTOR *) response )->RemovableMedia;
@@ -3263,7 +3305,7 @@ int libsmdev_internal_handle_determine_media_information(
 			libcnotify_printf(
 			 "\n" );
 		}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 	}
 #else
 #if defined( HAVE_SCSI_SG_H )
@@ -3369,7 +3411,21 @@ int libsmdev_internal_handle_determine_media_information(
 				 "%s: unable to set vendor.",
 				 function );
 
-				goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					if( ( error != NULL )
+					 && ( *error != NULL ) )
+					{
+						libcnotify_print_error_backtrace(
+						 *error );
+					}
+				}
+#endif
+				libcerror_error_free(
+				 error );
+
+				internal_handle->vendor[ 0 ] = 0;
 			}
 		}
 		if( response_count >= 32 )
@@ -3390,7 +3446,21 @@ int libsmdev_internal_handle_determine_media_information(
 				 "%s: unable to set model.",
 				 function );
 
-				goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					if( ( error != NULL )
+					 && ( *error != NULL ) )
+					{
+						libcnotify_print_error_backtrace(
+						 *error );
+					}
+				}
+#endif
+				libcerror_error_free(
+				 error );
+
+				internal_handle->model[ 0 ] = 0;
 			}
 		}
 		response_count = libsmdev_scsi_inquiry(
@@ -3451,7 +3521,21 @@ int libsmdev_internal_handle_determine_media_information(
 				 "%s: unable to set serial number.",
 				 function );
 
-				goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					if( ( error != NULL )
+					 && ( *error != NULL ) )
+					{
+						libcnotify_print_error_backtrace(
+						 *error );
+					}
+				}
+#endif
+				libcerror_error_free(
+				 error );
+
+				internal_handle->serial_number[ 0 ] = 0;
 			}
 		}
 	}
@@ -3493,7 +3577,21 @@ int libsmdev_internal_handle_determine_media_information(
 				 "%s: unable to set serial number.",
 				 function );
 
-				goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					if( ( error != NULL )
+					 && ( *error != NULL ) )
+					{
+						libcnotify_print_error_backtrace(
+						 *error );
+					}
+				}
+#endif
+				libcerror_error_free(
+				 error );
+
+				internal_handle->serial_number[ 0 ] = 0;
 			}
 			result = libsmdev_string_trim_copy_from_byte_stream(
 				  internal_handle->model,
@@ -3511,7 +3609,21 @@ int libsmdev_internal_handle_determine_media_information(
 				 "%s: unable to set model.",
 				 function );
 
-				goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					if( ( error != NULL )
+					 && ( *error != NULL ) )
+					{
+						libcnotify_print_error_backtrace(
+						 *error );
+					}
+				}
+#endif
+				libcerror_error_free(
+				 error );
+
+				internal_handle->model[ 0 ] = 0;
 			}
 			internal_handle->removable   = ( device_configuration.config & 0x0080 ) >> 7;
 			internal_handle->device_type = ( device_configuration.config & 0x1f00 ) >> 8;
@@ -3869,7 +3981,7 @@ on_error:
 }
 
 /* Retrieves the media size
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 int libsmdev_handle_get_media_size(
      libsmdev_handle_t *handle,
@@ -3938,7 +4050,7 @@ int libsmdev_handle_get_media_size(
 }
 
 /* Retrieves the number of bytes per sector
- * Returns the 1 if succesful, 0 if not or -1 on error
+ * Returns the 1 if successful, 0 if not or -1 on error
  */
 int libsmdev_handle_get_bytes_per_sector(
      libsmdev_handle_t *handle,
@@ -4844,7 +4956,7 @@ int libsmdev_handle_get_track(
 }
 
 /* Retrieves the number of read/write error retries
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 int libsmdev_handle_get_number_of_error_retries(
      libsmdev_handle_t *handle,
@@ -4884,7 +4996,7 @@ int libsmdev_handle_get_number_of_error_retries(
 }
 
 /* Sets the number of read/write error retries
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 int libsmdev_handle_set_number_of_error_retries(
      libsmdev_handle_t *handle,
@@ -4914,7 +5026,7 @@ int libsmdev_handle_set_number_of_error_retries(
 
 /* Retrieves the read/write error granularity
  * A value of 0 represents an error granularity of the entire buffer being read/written
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 int libsmdev_handle_get_error_granularity(
      libsmdev_handle_t *handle,
@@ -4955,7 +5067,7 @@ int libsmdev_handle_get_error_granularity(
 
 /* Sets the read/write error granularity
  * A value of 0 represents an error granularity of the entire buffer being read/written
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 int libsmdev_handle_set_error_granularity(
      libsmdev_handle_t *handle,
@@ -4995,7 +5107,7 @@ int libsmdev_handle_set_error_granularity(
 }
 
 /* Retrieves the read/write error flags
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 int libsmdev_handle_get_error_flags(
      libsmdev_handle_t *handle,
@@ -5035,7 +5147,7 @@ int libsmdev_handle_get_error_flags(
 }
 
 /* Sets the the read/write error flags
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 int libsmdev_handle_set_error_flags(
      libsmdev_handle_t *handle,

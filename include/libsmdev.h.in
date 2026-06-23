@@ -235,7 +235,7 @@ int libsmdev_handle_open_wide(
 #endif /* defined( LIBSMDEV_HAVE_WIDE_CHARACTER_TYPE ) */
 
 /* Closes the handle
- * Returns the 0 if succesful or -1 on error
+ * Returns the 0 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_close(
@@ -354,7 +354,7 @@ int libsmdev_handle_get_filename_wide(
  * ------------------------------------------------------------------------- */
 
 /* Retrieves the media size
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_get_media_size(
@@ -363,7 +363,7 @@ int libsmdev_handle_get_media_size(
      libsmdev_error_t **error );
 
 /* Retrieves the number of bytes per sector
- * Returns the 1 if succesful, 0 if not or -1 on error
+ * Returns the 1 if successful, 0 if not or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_get_bytes_per_sector(
@@ -372,7 +372,7 @@ int libsmdev_handle_get_bytes_per_sector(
      libsmdev_error_t **error );
 
 /* Retrieves the media type
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_get_media_type(
@@ -381,7 +381,7 @@ int libsmdev_handle_get_media_type(
      libsmdev_error_t **error );
 
 /* Retrieves the bus type
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_get_bus_type(
@@ -457,7 +457,7 @@ int libsmdev_handle_get_track(
      libsmdev_error_t **error );
 
 /* Retrieves the number of read/write error retries
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_get_number_of_error_retries(
@@ -466,7 +466,7 @@ int libsmdev_handle_get_number_of_error_retries(
      libsmdev_error_t **error );
 
 /* Sets the number of read/write error retries
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_set_number_of_error_retries(
@@ -476,7 +476,7 @@ int libsmdev_handle_set_number_of_error_retries(
 
 /* Retrieves the read/write error granularity
  * A value of 0 represents an error granularity of the entire buffer being read/written
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_get_error_granularity(
@@ -486,7 +486,7 @@ int libsmdev_handle_get_error_granularity(
 
 /* Sets the read/write error granularity
  * A value of 0 represents an error granularity of the entire buffer being read/written
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_set_error_granularity(
@@ -495,7 +495,7 @@ int libsmdev_handle_set_error_granularity(
      libsmdev_error_t **error );
 
 /* Retrieves the read/write error flags
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_get_error_flags(
@@ -504,7 +504,7 @@ int libsmdev_handle_get_error_flags(
      libsmdev_error_t **error );
 
 /* Sets the read/write error flags
- * Returns the 1 if succesful or -1 on error
+ * Returns the 1 if successful or -1 on error
  */
 LIBSMDEV_EXTERN \
 int libsmdev_handle_set_error_flags(

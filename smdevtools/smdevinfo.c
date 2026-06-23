@@ -73,7 +73,6 @@ void usage_fprint(
 	fprintf( stream, "\tsource: the source device file\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
-	fprintf( stream, "\t-i:     ignore data file(s)\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
 }
@@ -132,7 +131,6 @@ int main( int argc, char * const argv[] )
 	system_character_t *source = NULL;
 	char *program              = "smdevinfo";
 	system_integer_t option    = 0;
-	uint8_t ignore_data_files  = 0;
 	int verbose                = 0;
 
 #if defined( __MINGW32__ ) && defined( HAVE_MINGW_BINMODE )
@@ -173,7 +171,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = smdevtools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "ihvV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "hvV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -194,11 +192,6 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_SUCCESS );
-
-			case (system_integer_t) 'i':
-				ignore_data_files = 1;
-
-				break;
 
 			case (system_integer_t) 'v':
 				verbose = 1;
@@ -247,11 +240,6 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-#if defined( __clang_analyzer__ )
-	__builtin_assume( smdevinfo_info_handle != NULL );
-#endif
-	smdevinfo_info_handle->ignore_data_files = ignore_data_files;
-
 	if( smdevtools_signal_attach(
 	     smdevinfo_signal_handler,
 	     &error ) != 1 )
