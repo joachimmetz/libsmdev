@@ -30,6 +30,12 @@
 #include <stdlib.h>
 #endif
 
+#if defined( HAVE_SYS_TIME_H )
+#include <sys/time.h>
+#endif
+
+#include <time.h>
+
 #include "smdev_test_functions.h"
 #include "smdev_test_getopt.h"
 #include "smdev_test_libcerror.h"
@@ -46,6 +52,8 @@
 /* Define to make smdev_test_handle generate verbose output
 #define SMDEV_TEST_HANDLE_VERBOSE
  */
+
+#define SMDEV_TEST_HANDLE_READ_BUFFER_SIZE	4096
 
 /* Creates and opens a source handle
  * Returns 1 if successful or -1 on error
@@ -886,6 +894,737 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libsmdev_handle_read_buffer function
+ * Returns 1 if successful or 0 if not
+ */
+int smdev_test_handle_read_buffer(
+     libsmdev_handle_t *handle )
+{
+	uint8_t buffer[ SMDEV_TEST_HANDLE_READ_BUFFER_SIZE ];
+
+	libcerror_error_t *error      = NULL;
+	time_t timestamp              = 0;
+	size64_t media_size           = 0;
+	size64_t remaining_media_size = 0;
+	size_t read_size              = 0;
+	ssize_t read_count            = 0;
+	off64_t offset                = 0;
+	int number_of_tests           = 1024;
+	int random_number             = 0;
+	int result                    = 0;
+	int test_number               = 0;
+
+#if defined( SMDEV_TEST_HANDLE_VERBOSE )
+	off64_t media_offset          = 0;
+#endif
+
+	/* Determine size
+	 */
+	result = libsmdev_handle_get_media_size(
+	          handle,
+	          &media_size,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Reset offset to 0
+	 */
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	read_size = SMDEV_TEST_HANDLE_READ_BUFFER_SIZE;
+
+	if( media_size < SMDEV_TEST_HANDLE_READ_BUFFER_SIZE )
+	{
+		read_size = (size_t) media_size;
+	}
+	read_count = libsmdev_handle_read_buffer(
+	              handle,
+	              buffer,
+	              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) read_size );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	if( media_size > 8 )
+	{
+		/* Set offset to media_size - 8
+		 */
+		offset = libsmdev_handle_seek_offset(
+		          handle,
+		          -8,
+		          SEEK_END,
+		          &error );
+
+		SMDEV_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 offset,
+		 (int64_t) media_size - 8 );
+
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		/* Read buffer on media_size boundary
+		 */
+		read_count = libsmdev_handle_read_buffer(
+		              handle,
+		              buffer,
+		              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+		              &error );
+
+		SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) 8 );
+
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		/* Read buffer beyond media_size boundary
+		 */
+		read_count = libsmdev_handle_read_buffer(
+		              handle,
+		              buffer,
+		              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+		              &error );
+
+		SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) 0 );
+
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+	}
+	/* Stress test read buffer
+	 */
+	timestamp = time(
+	             NULL );
+
+	srand(
+	 (unsigned int) timestamp );
+
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	remaining_media_size = media_size;
+
+	for( test_number = 0;
+	     test_number < number_of_tests;
+	     test_number++ )
+	{
+		random_number = rand();
+
+		SMDEV_TEST_ASSERT_GREATER_THAN_INT(
+		 "random_number",
+		 random_number,
+		 -1 );
+
+		read_size = (size_t) random_number % SMDEV_TEST_HANDLE_READ_BUFFER_SIZE;
+
+#if defined( SMDEV_TEST_HANDLE_VERBOSE )
+		fprintf(
+		 stdout,
+		 "libsmdev_handle_read_buffer: at offset: %" PRIi64 " (0x%08" PRIx64 ") of size: %" PRIzd "\n",
+		 media_offset,
+		 media_offset,
+		 read_size );
+#endif
+		read_count = libsmdev_handle_read_buffer(
+		              handle,
+		              buffer,
+		              read_size,
+		              &error );
+
+		if( read_size > remaining_media_size )
+		{
+			read_size = (size_t) remaining_media_size;
+		}
+		SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) read_size );
+
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		remaining_media_size -= read_count;
+
+#if defined( SMDEV_TEST_HANDLE_VERBOSE )
+		media_offset += read_count;
+#endif
+
+		if( remaining_media_size == 0 )
+		{
+			offset = libsmdev_handle_seek_offset(
+			          handle,
+			          0,
+			          SEEK_SET,
+			          &error );
+
+			SMDEV_TEST_ASSERT_EQUAL_INT64(
+			 "offset",
+			 offset,
+			 (int64_t) 0 );
+
+			SMDEV_TEST_ASSERT_IS_NULL(
+			 "error",
+			 error );
+
+			remaining_media_size = media_size;
+
+#if defined( SMDEV_TEST_HANDLE_VERBOSE )
+			media_offset = 0;
+#endif
+		}
+	}
+	/* Test error cases
+	 */
+	read_count = libsmdev_handle_read_buffer(
+	              NULL,
+	              buffer,
+	              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libsmdev_handle_read_buffer(
+	              handle,
+	              NULL,
+	              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libsmdev_handle_read_buffer(
+	              handle,
+	              buffer,
+	              (size_t) SSIZE_MAX + 1,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libsmdev_handle_read_buffer_at_offset function
+ * Returns 1 if successful or 0 if not
+ */
+int smdev_test_handle_read_buffer_at_offset(
+     libsmdev_handle_t *handle )
+{
+	uint8_t buffer[ SMDEV_TEST_HANDLE_READ_BUFFER_SIZE ];
+
+	libcerror_error_t *error      = NULL;
+	time_t timestamp              = 0;
+	size64_t media_size           = 0;
+	size64_t remaining_media_size = 0;
+	size_t read_size              = 0;
+	ssize_t read_count            = 0;
+	off64_t media_offset          = 0;
+	off64_t offset                = 0;
+	int number_of_tests           = 1024;
+	int random_number             = 0;
+	int result                    = 0;
+	int test_number               = 0;
+
+	/* Determine size
+	 */
+	result = libsmdev_handle_get_media_size(
+	          handle,
+	          &media_size,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	read_size = SMDEV_TEST_HANDLE_READ_BUFFER_SIZE;
+
+	if( media_size < SMDEV_TEST_HANDLE_READ_BUFFER_SIZE )
+	{
+		read_size = (size_t) media_size;
+	}
+	read_count = libsmdev_handle_read_buffer_at_offset(
+	              handle,
+	              buffer,
+	              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+	              0,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) read_size );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	if( media_size > 8 )
+	{
+		/* Read buffer on media_size boundary
+		 */
+		read_count = libsmdev_handle_read_buffer_at_offset(
+		              handle,
+		              buffer,
+		              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+		              media_size - 8,
+		              &error );
+
+		SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) 8 );
+
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		/* Read buffer beyond media_size boundary
+		 */
+		read_count = libsmdev_handle_read_buffer_at_offset(
+		              handle,
+		              buffer,
+		              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+		              media_size + 8,
+		              &error );
+
+		SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) 0 );
+
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+	}
+	/* Stress test read buffer
+	 */
+	timestamp = time(
+	             NULL );
+
+	srand(
+	 (unsigned int) timestamp );
+
+	for( test_number = 0;
+	     test_number < number_of_tests;
+	     test_number++ )
+	{
+		random_number = rand();
+
+		SMDEV_TEST_ASSERT_GREATER_THAN_INT(
+		 "random_number",
+		 random_number,
+		 -1 );
+
+		if( media_size > 0 )
+		{
+			media_offset = (off64_t) random_number % media_size;
+		}
+		read_size = (size_t) random_number % SMDEV_TEST_HANDLE_READ_BUFFER_SIZE;
+
+#if defined( SMDEV_TEST_HANDLE_VERBOSE )
+		fprintf(
+		 stdout,
+		 "libsmdev_handle_read_buffer_at_offset: at offset: %" PRIi64 " (0x%08" PRIx64 ") of size: %" PRIzd "\n",
+		 media_offset,
+		 media_offset,
+		 read_size );
+#endif
+		read_count = libsmdev_handle_read_buffer_at_offset(
+		              handle,
+		              buffer,
+		              read_size,
+		              media_offset,
+		              &error );
+
+		remaining_media_size = media_size - media_offset;
+
+		if( read_size > remaining_media_size )
+		{
+			read_size = (size_t) remaining_media_size;
+		}
+		SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) read_size );
+
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		remaining_media_size -= read_count;
+
+		if( remaining_media_size == 0 )
+		{
+			offset = libsmdev_handle_seek_offset(
+			          handle,
+			          0,
+			          SEEK_SET,
+			          &error );
+
+			SMDEV_TEST_ASSERT_EQUAL_INT64(
+			 "offset",
+			 offset,
+			 (int64_t) 0 );
+
+			SMDEV_TEST_ASSERT_IS_NULL(
+			 "error",
+			 error );
+		}
+	}
+	/* Test error cases
+	 */
+	read_count = libsmdev_handle_read_buffer_at_offset(
+	              NULL,
+	              buffer,
+	              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+	              0,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libsmdev_handle_read_buffer_at_offset(
+	              handle,
+	              NULL,
+	              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+	              0,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libsmdev_handle_read_buffer_at_offset(
+	              handle,
+	              buffer,
+	              (size_t) SSIZE_MAX + 1,
+	              0,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libsmdev_handle_read_buffer_at_offset(
+	              handle,
+	              buffer,
+	              SMDEV_TEST_HANDLE_READ_BUFFER_SIZE,
+	              -1,
+	              &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libsmdev_handle_seek_offset function
+ * Returns 1 if successful or 0 if not
+ */
+int smdev_test_handle_seek_offset(
+     libsmdev_handle_t *handle )
+{
+	libcerror_error_t *error = NULL;
+	size64_t size            = 0;
+	off64_t offset           = 0;
+
+	/* Test regular cases
+	 */
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          0,
+	          SEEK_END,
+	          &error );
+
+	SMDEV_TEST_ASSERT_NOT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	size = (size64_t) offset;
+
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          1024,
+	          SEEK_SET,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 1024 );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          -512,
+	          SEEK_CUR,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 512 );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          (off64_t) ( size + 512 ),
+	          SEEK_SET,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) ( size + 512 ) );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Reset offset to 0
+	 */
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	SMDEV_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	offset = libsmdev_handle_seek_offset(
+	          NULL,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          -1,
+	          SEEK_SET,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          -1,
+	          SEEK_CUR,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	offset = libsmdev_handle_seek_offset(
+	          handle,
+	          (off64_t) ( -1 * ( size + 1 ) ),
+	          SEEK_END,
+	          &error );
+
+	SMDEV_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) -1 );
+
+	SMDEV_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 /* Tests the libsmdev_handle_get_offset function
  * Returns 1 if successful or 0 if not
  */
@@ -1305,15 +2044,24 @@ int main(
 		 smdev_test_handle_signal_abort,
 		 handle );
 
-		/* TODO: add tests for libsmdev_handle_read_buffer */
+		SMDEV_TEST_RUN_WITH_ARGS(
+		 "libsmdev_handle_read_buffer",
+		 smdev_test_handle_read_buffer,
+		 handle );
 
-		/* TODO: add tests for libsmdev_handle_read_buffer_at_offset */
+		SMDEV_TEST_RUN_WITH_ARGS(
+		 "libsmdev_handle_read_buffer_at_offset",
+		 smdev_test_handle_read_buffer_at_offset,
+		 handle );
 
 		/* TODO: add tests for libsmdev_handle_write_buffer */
 
 		/* TODO: add tests for libsmdev_handle_write_buffer_at_offset */
 
-		/* TODO: add tests for libsmdev_handle_seek_offset */
+		SMDEV_TEST_RUN_WITH_ARGS(
+		 "libsmdev_handle_seek_offset",
+		 smdev_test_handle_seek_offset,
+		 handle );
 
 		SMDEV_TEST_RUN_WITH_ARGS(
 		 "libsmdev_handle_get_offset",
