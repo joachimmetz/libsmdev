@@ -1,7 +1,6 @@
 # Tests library functions and types.
 
-$LibraryTests = "ata error handle notify optical_disc scsi sector_range string support track_value"
-$LibraryTestsWithInput = ""
+$LibraryTests = "ata error notify optical_disc scsi sector_range string support track_value"
 $OptionSets = "" -split " "
 
 . .\test_functions.ps1
@@ -15,7 +14,7 @@ If (-Not (Test-Path ${TestExecutablesDirectory}))
 	Exit ${ExitFailure}
 }
 
-$Result = ${ExitIgnore}
+$Result = ${ExitSuccess}
 
 Foreach (${TestName} in ${LibraryTests} -split " ")
 {
@@ -24,36 +23,24 @@ Foreach (${TestName} in ${LibraryTests} -split " ")
 	{
 		Continue
 	}
-	$Result = RunTestBinary ${TestExecutablesDirectory} "smdev_test_${TestName}"
+	$ResultRun = RunTestBinary ${TestExecutablesDirectory} "smdev_test_${TestName}"
 
-	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
+	If ((${ResultRun} -ne ${ExitSuccess}) -And (${ResultRun} -ne ${ExitIgnore}))
 	{
-		Break
+		$Result = ${ResultRun}
 	}
 }
 
-$TestInputs = GenerateTestInputs "libsmdev" ${OptionSets}
+$ResultRun = RunTestBinaryWithInput ${TestExecutablesDirectory} "smdev_test_handle" "\\.\PhysicalDrive0"
 
-Foreach (${TestName} in ${LibraryTestsWithInput} -split " ")
+If ((${ResultRun} -ne ${ExitSuccess}) -And (${ResultRun} -ne ${ExitIgnore}))
 {
-	# Split will return an array of a single empty string when LibraryTestsWithInput is empty.
-	If (-Not (${TestName}))
-	{
-		Continue
-	}
-	ForEach ($TestInput in ${TestInputs})
-	{
-		$Result = RunTestBinaryWithInput ${TestExecutablesDirectory} "smdev_test_${TestName}" ${TestInput}
-
-		If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
-		{
-			Break
-		}
-	}
-	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
-	{
-		Break
-	}
+	$Result = ${ResultRun}
 }
+$ResultRun = RunTestBinaryWithInput ${TestExecutablesDirectory} "smdev_test_handle" "\\.\C:"
 
+If ((${ResultRun} -ne ${ExitSuccess}) -And (${ResultRun} -ne ${ExitIgnore}))
+{
+	$Result = ${ResultRun}
+}
 Exit ${Result}

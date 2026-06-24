@@ -31,6 +31,7 @@
 #endif
 
 #include "smdev_test_functions.h"
+#include "smdev_test_getopt.h"
 #include "smdev_test_libcerror.h"
 #include "smdev_test_libcfile.h"
 #include "smdev_test_libsmdev.h"
@@ -1127,23 +1128,45 @@ on_error:
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
-     int argc SMDEV_TEST_ATTRIBUTE_UNUSED,
-     wchar_t * const argv[] SMDEV_TEST_ATTRIBUTE_UNUSED )
+     int argc,
+     wchar_t * const argv[] )
 #else
 int main(
-     int argc SMDEV_TEST_ATTRIBUTE_UNUSED,
-     char * const argv[] SMDEV_TEST_ATTRIBUTE_UNUSED )
+     int argc,
+     char * const argv[] )
 #endif
 {
 	libcerror_error_t *error     = NULL;
 	libcfile_file_t *device_file = NULL;
 	libsmdev_handle_t *handle    = NULL;
 	system_character_t *source   = NULL;
+	system_integer_t option      = 0;
 	int result                   = 0;
 
 	SMDEV_TEST_UNREFERENCED_PARAMETER( argc )
 	SMDEV_TEST_UNREFERENCED_PARAMETER( argv )
 
+	while( ( option = smdev_test_getopt(
+	                   argc,
+	                   argv,
+	                   _SYSTEM_STRING( "" ) ) ) != (system_integer_t) -1 )
+	{
+		switch( option )
+		{
+			case (system_integer_t) '?':
+			default:
+				fprintf(
+				 stderr,
+				 "Invalid argument: %" PRIs_SYSTEM ".\n",
+				 argv[ optind - 1 ] );
+
+				return( EXIT_FAILURE );
+		}
+	}
+	if( optind < argc )
+	{
+		source = argv[ optind ];
+	}
 #if defined( HAVE_DEBUG_OUTPUT ) && defined( SMDEV_TEST_HANDLE_VERBOSE )
 	libsmdev_notify_set_verbose(
 	 1 );
@@ -1151,15 +1174,6 @@ int main(
 	 stderr,
 	 NULL );
 #endif
-
-	SMDEV_TEST_RUN(
-	 "libsmdev_handle_initialize",
-	 smdev_test_handle_initialize );
-
-	SMDEV_TEST_RUN(
-	 "libsmdev_handle_free",
-	 smdev_test_handle_free );
-
 	if( source != NULL )
 	{
 		result = libcfile_file_initialize(
@@ -1179,25 +1193,6 @@ int main(
 		 "error",
 		 error );
 
-#if defined( WINAPI )
-		source = _SYSTEM_STRING( "\\\\.\\PhysicalDrive0" );
-#else
-		source = _SYSTEM_STRING( "/dev/sda" );
-
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libcfile_file_exists_wide(
-		          source,
-		          NULL );
-#else
-		result = libcfile_file_exists(
-		          source,
-		          NULL );
-#endif
-		if( result != 1 )
-		{
-			source = _SYSTEM_STRING( "/dev/vda" );
-		}
-#endif
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libcfile_file_open_wide(
 		          device_file,
@@ -1245,9 +1240,17 @@ int main(
 		 "error",
 		 error );
 	}
-#if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
+	SMDEV_TEST_RUN(
+	 "libsmdev_handle_initialize",
+	 smdev_test_handle_initialize );
+
+	SMDEV_TEST_RUN(
+	 "libsmdev_handle_free",
+	 smdev_test_handle_free );
+
 	if( source != NULL )
 	{
+#if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
 		SMDEV_TEST_RUN_WITH_ARGS(
 		 "libsmdev_handle_open",
 		 smdev_test_handle_open,
@@ -1280,22 +1283,22 @@ int main(
 		/* Initialize test
 		 */
 		result = smdev_test_handle_open_source(
-		          &handle,
-		          source,
-		          &error );
+			  &handle,
+			  source,
+			  &error );
 
 		SMDEV_TEST_ASSERT_EQUAL_INT(
 		 "result",
 		 result,
 		 1 );
 
-	        SMDEV_TEST_ASSERT_IS_NOT_NULL(
-	         "handle",
-	         handle );
+		SMDEV_TEST_ASSERT_IS_NOT_NULL(
+		 "handle",
+		 handle );
 
-	        SMDEV_TEST_ASSERT_IS_NULL(
-	         "error",
-	         error );
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
 
 		SMDEV_TEST_RUN_WITH_ARGS(
 		 "libsmdev_handle_signal_abort",
@@ -1356,8 +1359,8 @@ int main(
 		/* Clean up
 		 */
 		result = smdev_test_handle_close_source(
-		          &handle,
-		          &error );
+			  &handle,
+			  &error );
 
 		SMDEV_TEST_ASSERT_EQUAL_INT(
 		 "result",
@@ -1365,12 +1368,12 @@ int main(
 		 0 );
 
 		SMDEV_TEST_ASSERT_IS_NULL(
-	         "handle",
-	         handle );
+		 "handle",
+		 handle );
 
-	        SMDEV_TEST_ASSERT_IS_NULL(
-	         "error",
-	         error );
+		SMDEV_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
 	}
 #endif /* !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 ) */
 

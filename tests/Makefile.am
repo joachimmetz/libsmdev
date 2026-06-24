@@ -64,6 +64,7 @@ smdev_test_error_LDADD = \
 
 smdev_test_handle_SOURCES = \
 	smdev_test_functions.c smdev_test_functions.h \
+	smdev_test_getopt.c smdev_test_getopt.h \
 	smdev_test_handle.c \
 	smdev_test_libcerror.h \
 	smdev_test_libclocale.h \

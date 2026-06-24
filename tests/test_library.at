@@ -1,6 +1,35 @@
 m4_include([package.m4])
 m4_include([test_macros.at])
 
+dnl Runs test handle
+m4_define([RUN_TEST_HANDLE],
+  [m4_foreach_w(
+    [test_file],
+    [/dev/ada0 /dev/da0 /dev/sda /dev/vda /dev/vtbd0],
+    [m4_syscmd([test -e ]test_file)
+
+    m4_if(
+      m4_sysval,
+      [0],
+      [m4_define(
+        [test_binary],
+        [m4_expand(test_prefix[]_test_handle)])dnl
+
+      m4_define([sanitized_test_file],
+        [m4_translit([test_file], [[],[],[]"'`\], [______])])
+
+      AT_SETUP(test_binary with input: 'sanitized_test_file')
+
+      AT_SKIP_IF(
+        [test -n "${SKIP_LIBRARY_TESTS}"])
+
+      AT_CHECK(
+        [ath_fn_run_test_binary test_binary test_input])
+
+      AT_CLEANUP])
+    ])
+  ])
+
 dnl Wrap m4_define to overwrite AT_TESTSUITE_NAME
 m4_define([_M4_DEFINE_HOOK], m4_defn([m4_define]))
 m4_define([m4_define],
@@ -31,4 +60,6 @@ SETUP_HELPER_FUNCTIONS
 
 RUN_TEST_BINARIES(
   [SKIP_LIBRARY_TESTS],
-  [ata error handle notify optical_disc scsi sector_range string support track_value])
+  [ata error notify optical_disc scsi sector_range string support track_value])
+
+RUN_TEST_HANDLE
